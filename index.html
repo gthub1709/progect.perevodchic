@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Переводчик с Озвучкой</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #2c2c2c; /* Серый фон */
+            color: #fff;
+            text-shadow: 1px 1px 2px black;
+            transition: background-color 1s ease-in-out;
+        }
+
+        textarea, select, button {
+            margin: 10px;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        #outputText {
+            margin-top: 20px;
+            font-size: 24px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        #flag {
+            margin-top: 20px;
+            height: 60px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌐 Переводчик с Озвучкой</h1>
+    <textarea id="inputText" rows="4" cols="50" placeholder="Введите текст..."></textarea><br>
+
+    <label for="language">Выберите язык перевода:</label>
+    <select id="language" onchange="changeCountryAssets()">
+        <option value="ru">Русский</option>
+        <option value="pt">Португальский</option>
+        <option value="uz">Узбекский</option>
+        <option value="tg">Таджикский</option>
+        <option value="en">Английский</option>
+        <option value="es">Испанский</option>
+        <option value="zh">Китайский</option>
+        <option value="de">Немецкий</option>
+        <option value="fr">Французский</option>
+        <option value="ja">Японский</option>
+        <option value="ar">Арабский</option>
+        <option value="it">Итальянский</option>
+        <option value="yo">Йоруба (Нигерия)</option>
+    </select><br>
+
+    <img id="flag" src="" alt="Флаг страны"><br>
+
+    <button onclick="translateText()">Перевести и Озвучить</button>
+
+    <h2 id="outputText">Здесь будет перевод</h2>
+
+    <script>
+        const countryAssets = {
+            ru: {
+                flag: 'https://flagcdn.com/w80/ru.png'
+            },
+            pt: {
+                flag: 'https://flagcdn.com/w80/pt.png'
+            },
+            uz: {
+                flag: 'https://flagcdn.com/w80/uz.png'
+            },
+            tg: {
+                flag: 'https://flagcdn.com/w80/tj.png'
+            },
+            en: {
+                flag: 'https://flagcdn.com/w80/gb.png'
+            },
+            es: {
+                flag: 'https://flagcdn.com/w80/es.png'
+            },
+            zh: {
+                flag: 'https://flagcdn.com/w80/cn.png'
+            },
+            de: {
+                flag: 'https://flagcdn.com/w80/de.png'
+            },
+            fr: {
+                flag: 'https://flagcdn.com/w80/fr.png'
+            },
+            ja: {
+                flag: 'https://flagcdn.com/w80/jp.png'
+            },
+            ar: {
+                flag: 'https://flagcdn.com/w80/sa.png'
+            },
+            it: {
+                flag: 'https://flagcdn.com/w80/it.png'
+            },
+            yo: {
+                flag: 'https://flagcdn.com/w80/ng.png'
+            }
+        };
+
+        function changeCountryAssets() {
+            const selectedLang = document.getElementById('language').value;
+            const assets = countryAssets[selectedLang];
+            if (assets) {
+                document.getElementById('flag').src = assets.flag;
+                document.getElementById('flag').alt = `Флаг языка ${selectedLang}`;
+            }
+        }
+
+        async function translateText() {
+            const text = document.getElementById('inputText').value;
+            const targetLang = document.getElementById('language').value;
+
+            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=ru|${targetLang}`);
+            const data = await response.json();
+
+            const translated = data.responseData.translatedText;
+            document.getElementById('outputText').textContent = translated;
+
+            const utterance = new SpeechSynthesisUtterance(translated);
+            utterance.lang = getVoiceLang(targetLang);
+            speechSynthesis.speak(utterance);
+        }
+
+        function getVoiceLang(code) {
+            const map = {
+                ru: 'ru-RU',
+                pt: 'pt-BR',
+                uz: 'uz-UZ',
+                tg: 'tg-TJ',
+                en: 'en-US',
+                es: 'es-ES',
+                zh: 'zh-CN',
+                de: 'de-DE',
+                fr: 'fr-FR',
+                ja: 'ja-JP',
+                ar: 'ar-SA',
+                it: 'it-IT',
+                yo: 'yo-NG'
+            };
+            return map[code] || 'en-US';
+        }
+
+        // Установка стартового флага
+        changeCountryAssets();
+    </script>
+</body>
+</html>
